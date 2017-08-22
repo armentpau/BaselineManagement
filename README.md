@@ -1,4 +1,4 @@
-This is an experimental/Custom build to allow for the BaselineManagment module to compile multiple GPO files into one configuration file.
+This is an experimental/Custom build to allow for the BaselineManagment module to compile multiple GPO files into one configuration file.  It is a work in progress and more than likely is broken.
 
 This solution is built off GPRegistryParser found here: https://github.com/PowerShell/GPRegistryPolicyParser
 
