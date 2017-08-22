@@ -23,7 +23,8 @@ Function Write-GPOInternetSettingsXMLData
     }
     else
     {
-        $Condition = [scriptblock]"`$InternetExplorerVersion -eq $($XML.ParentNode.ParentNode.Name)"
+		#$Condition = [scriptblock]"`$InternetExplorerVersion -eq $($XML.ParentNode.ParentNode.Name)"
+		$Condition = $executionContext.invokeCommand.NewScriptBlock("`$InternetExplorerVersion -eq `"$($XML.ParentNode.ParentNode.Name)`"")
     }
 
     $regHash.ValueName = $XML.name
@@ -46,8 +47,8 @@ Function Write-GPOInternetSettingsXMLData
 
     $regHash.ValueData = $ValueData
     $regHash.ValueType = $XML.type
-    
-    Update-RegistryHashtable -Hashtable $regHash
+	
+	Update-RegistryHashtable -Hashtable $regHash
     Write-DSCString -Resource -Type Registry -Name $Name -CommentOut:$CommentOut -Parameters $regHash -Condition $Condition
 }
 #endregion

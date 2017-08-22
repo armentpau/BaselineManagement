@@ -410,8 +410,9 @@ function ConvertFrom-GPO
 	
 	# Loop through each Pol file.
 	$indexCounter = 0
-	foreach ($item in $(if ($pscmdlet.parametersetname -eq "OrderedGPO")
+	foreach ($polfile in $(if ($pscmdlet.parametersetname -eq "OrderedGPO")
 			{
+				$indexCounter = 0
 				$orderedgpo.gpodata | ForEach-Object{
 					if (-not ([string]::IsNullOrEmpty(($orderedgpo.gpodata[$indexcounter]).displayname)))
 					{
@@ -432,10 +433,10 @@ function ConvertFrom-GPO
 		if ((Get-Command "Read-PolFile" -ErrorAction SilentlyContinue) -ne $null)
 		{
 			# Reaad each POL file found.
-			Write-Verbose "Reading Pol File ($($polFiles.FullName))"
+			Write-Verbose "Reading Pol File ($($polfile.FullName))"
 			Try
 			{
-				$registryPolicies = Read-PolFile -Path $polFiles.FullName
+				$registryPolicies = Read-PolFile -Path $polfile.FullName
 			}
 			Catch
 			{
@@ -445,10 +446,10 @@ function ConvertFrom-GPO
 		elseif ((Get-Command "Parse-PolFile" -ErrorAction SilentlyContinue) -ne $null)
 		{
 			# Reaad each POL file found.
-			Write-Verbose "Reading Pol File ($($polFiles.FullName))"
+			Write-Verbose "Reading Pol File ($($polfile.FullName))"
 			Try
 			{
-				$registryPolicies = Parse-PolFile -Path $polFiles.FullName
+				$registryPolicies = Parse-PolFile -Path $polfile.FullName
 			}
 			catch
 			{
@@ -467,12 +468,30 @@ function ConvertFrom-GPO
 			$Hive = @{ User = "HKCU"; Machine = "HKLM" }
 			
 			# Convert each Policy Registry object into a Resource Block and add it to our Configuration string.
-			$ConfigString += Write-GPORegistryPOLData -Data $Policy -Hive $Hive[$polFiles.Directory.BaseName]
+			$ConfigString += Write-GPORegistryPOLData -Data $Policy -Hive $Hive[$polfile.Directory.BaseName]
 		}
 	}
 	
 	# Loop through each Audit CSV in the GPO Directory.
-	foreach ($AuditCSV in $AuditCSVs)
+	foreach($AuditCSV in $(if ($pscmdlet.parametersetname -eq "OrderedGPO")
+			{
+				$indexCounter = 0
+				$orderedgpo.gpodata | ForEach-Object{
+					if (-not ([string]::IsNullOrEmpty(($orderedgpo.gpodata[$indexcounter]).displayname)))
+					{
+						$AuditCSVs | Where-Object{
+							$_.fullname -like "*$($orderedgpo.gpodata[$indexCounter].displayname)*"
+						}
+					}
+					$indexCounter++
+				}
+			}
+			else
+			{
+				$AuditCSVs
+			}
+		)
+	)
 	{
 		foreach ($CSV in $AuditCSV)
 		{
@@ -481,7 +500,25 @@ function ConvertFrom-GPO
 	}
 	
 	# Loop through all the GPTemplate files.
-	foreach ($GPTemplateINF in $GPTemplateINFs)
+	foreach ($GPTemplateINF in $(if ($pscmdlet.parametersetname -eq "OrderedGPO")
+			{
+				$indexCounter = 0
+				$orderedgpo.gpodata | ForEach-Object{
+					if (-not ([string]::IsNullOrEmpty(($orderedgpo.gpodata[$indexcounter]).displayname)))
+					{
+						$GPTemplateINFs | Where-Object{
+							$_.fullname -like "*$($orderedgpo.gpodata[$indexCounter].displayname)*"
+						}
+					}
+					$indexCounter++
+				}
+			}
+			else
+			{
+				$GPTemplateINFs
+			}
+		)
+	)
 	{
 		Write-Verbose "Reading GPTmp.inf ($($GPTemplateINF.FullName))"
 		# GPTemp files are in INI format so this function converts it to a hashtable.
@@ -614,7 +651,25 @@ function ConvertFrom-GPO
 	}
 	
 	# There is also SOMETIMES a RegistryXML file that contains some additional registry information.
-	foreach ($XML in $PreferencesXMLs)
+	foreach ($XML in $(if ($pscmdlet.parametersetname -eq "OrderedGPO")
+			{
+				$indexCounter = 0
+				$orderedgpo.gpodata | ForEach-Object{
+					if (-not ([string]::IsNullOrEmpty(($orderedgpo.gpodata[$indexcounter]).displayname)))
+					{
+						$PreferencesXMLs | Where-Object{
+							$_.fullname -like "*$($orderedgpo.gpodata[$indexCounter].displayname)*"
+						}
+					}
+					$indexCounter++
+				}
+			}
+			else
+			{
+				$PreferencesXMLs
+			}
+		)
+	)
 	{
 		Write-Verbose "Reading $($XML.BaseName)XML ($($XML.FullName))"
 		

@@ -250,3 +250,9 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+src/Helpers/Functions\.TempPoint\.ps1
+
+src/BaselineManagement\.TempPoint\.psm1
+
+src/Parsers/GPO/InternetSettings\.TempPoint\.ps1
