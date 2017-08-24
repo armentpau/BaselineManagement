@@ -3,6 +3,10 @@
 New-Variable -Name GlobalConflictEngine -Value @{} -Option AllScope -Scope Script -Force
 $GlobalConflictEngine = @{}
 
+#Create a variable so we can detect conflicts in the names in the configuration.
+New-Variable -Name GlobalNameConflictEngine -Value @{ } -Option AllScope -Scope Script -Force
+$GlobalNameConflictEngine = @{}
+
 # Create a variable to track every resource processed for Summary Data.
 New-Variable -Name ProcessingHistory -Value @{} -Option AllScope -Scope Script -Force
 $ProcessingHistory = @{}
@@ -75,17 +79,29 @@ Function Test-Conflicts
             $ResourceKeys = @()
 
             # Loop through every Key/Value Pair in the Resource definition to see if they match the current one.
-            foreach ($KeyPair in $hashtable.GetEnumerator())
+            foreach ($KeyPair in $hashtable.GetEnumerator()) 
             {
                 # Add the test result to our Conflict Array.
-                $Conflict += $KeyPair.Value -eq $Resource[$KeyPair.Name]    
+                $Conflict += $KeyPair.Value -eq $Resource[$KeyPair.Name]
                 # Need to store which Key/Value Pairs we checked.
                 $ResourceKeys += $KeyPair.Name
             }
-                    
-            # If we found a conflict.
-            if ($ResourceKeys.Count -gt 0 -and $Conflict -notcontains $false)
-            {
+			
+			# If we found a conflict.
+			#if ($Name -like "*ACL(INF): HKLM:\SOFTWARE\Aurora*")
+	#		{
+	#			Wait-Debugger
+	#		}
+			if ($script:GlobalNameConflictEngine.get_item($Name))
+			{
+				Write-Verbose "Detected conflicting name $($Name).  Commenting Out Block"
+				$GlobalConflict = $true
+				$conflictOnName = $true
+				break
+			}
+			if ($ResourceKeys.Count -gt 0 -and $Conflict -notcontains $false)
+			{
+				#Wait-Debugger
                 Write-Verbose "Detected Potential Conflict in $Name. Commenting Out Block"
                 $GlobalConflict = $true
                 break
@@ -104,8 +120,8 @@ Function Test-Conflicts
         foreach ($Key in $ResourceKeys)
         {
             $tmpHash[$key] = $Resource[$key]
-        }
-
+		}
+		$script:GlobalNameConflictEngine.add($Name, $name) #add the name to the collective
         $Script:GlobalConflictEngine[$Type] += $tmpHash
     }
     
@@ -393,27 +409,54 @@ Configuration $Name`n{`n`n`t
         {
             $Tabs = 2
             $DSCString = ""
-            # A Condition was specified for this resource block.
-            if ($PSBoundParameters.ContainsKey("Condition"))
+			# A Condition was specified for this resource block.
+			# Variables to be used for commeting out resource if necessary.
+			$CommentStart = ""
+			$CommentEnd = ""
+			
+			if ($CommentOut)
+			{
+				$CommentStart = "<#"
+				$CommentEnd = "#>"
+			}
+			
+			if ($PSBoundParameters.ContainsKey("Condition"))
+			{
+				if ($CommentOUT -eq $true)
+				{
+					$DSCString += "$(Get-Tabs $Tabs)$($CommentStart)if ($($Condition.ToString()))`n $(Get-Tabs $Tabs){`n"
+				}
+				else
+				{
+					$DSCString += "$(Get-Tabs $Tabs)if ($($Condition.ToString()))`n $(Get-Tabs $Tabs){`n"
+				}
+				$Tabs++
+			}
+			<#if ($PSBoundParameters.ContainsKey("Condition"))
             {
                 $DSCString += "$(Get-Tabs $Tabs)if ($($Condition.ToString()))`n $(Get-Tabs $Tabs){`n"
                 $Tabs++
-            }
+            }#>
 
             # Variables to be used for commeting out resource if necessary.
             $CommentStart = ""
             $CommentEnd = ""
-                   
-            $CommentOUT = Test-Conflicts -Type $Type -Name $Name -Resource $Parameters -CommentOut:$CommentOUT
-            
+			
+			$CommentOUT = Test-Conflicts -Type $Type -Name $Name -Resource $Parameters -CommentOut:$CommentOUT
             # If we are commenting this block out, then set up our comment characters.                        
-            if ($CommentOut)
+            if ($CommentOut -and -not ($PSBoundParameters.ContainsKey("Condition")))
             {
                 $CommentStart = "<#"
                 $CommentEnd = "#>"
-            }
-
-            # If they passed a comment FOR the block, add it above the block.
+			}
+			else
+			{
+				#Write-Host "if statement false"
+				#Write-Host $CommentOUT
+				#Write-Host $PSBoundParameters.ContainsKey("Condition")
+			}
+			
+			# If they passed a comment FOR the block, add it above the block.
             if ($PSBoundParameters.ContainsKey("Comment"))
             {
                 $tmpComment = "<#`n"
@@ -435,20 +478,26 @@ Configuration $Name`n{`n`n`t
                 $DSCString += Write-DSCStringKeyPair -Key $key -Value $Parameters[$key] -Tabs $Tabs
             }
             $Tabs--
-            $DSCString += "`n`n$(Get-Tabs $Tabs)}$CommentEnd"
+            $DSCString += "`n`n$(Get-Tabs $Tabs)}$CommentEnd`n"
 
-            if ($PSBoundParameters.ContainsKey("Condition"))
-			{
-                $DSCString += "$(Get-Tabs $Tabs)if ($($Condition.ToString()))`n $(Get-Tabs $Tabs){`n"
-                $Tabs++
-            }
             $Tabs--
             if ($PSBoundParameters.ContainsKey("Condition"))
-            {
-                $DSCString += "`n`n$(Get-Tabs $Tabs)}"
-            }
-            
-            $DSCString += "`n`n"
+			{
+				$CommentStart = "<#"
+				$CommentEnd = "#>"
+				if ($CommentOUT -eq $true)
+				{
+					#Write-Host "Condition"
+					$DSCString += "`n`n$(Get-Tabs $Tabs)}$($CommentEnd)"
+				}
+				else
+				{
+					#Write-Host "no condition"
+					$DSCString += "`n`n$(Get-Tabs $Tabs)}"
+				}
+			}
+			
+			$DSCString += "`n`n"
         }
     }
 

@@ -260,6 +260,12 @@ function ConvertTo-DSC
 	.PARAMETER BackupDirectory
 		A description of the BackupDirectory parameter.
 	
+	.PARAMETER UseExisting
+		A description of the UseExisting parameter.
+	
+	.PARAMETER UseExistingGPOs
+		A description of the UseExistingGPOs parameter.
+	
 	.EXAMPLE
 		Backup-GPO <GPO Name> | ConvertFrom-GPO
 	
@@ -313,7 +319,9 @@ function ConvertFrom-GPO
 		[Parameter(ParameterSetName = 'OrderedGPO',
 				   Mandatory = $true)]
 		[ValidateScript({ test-path $_ })]
-		[string]$BackupDirectory
+		[string]$BackupDirectory,
+		[Parameter(ParameterSetName = 'OrderedGPO')]
+		[switch]$UseExisting
 	)
 	
 	#If we are passed OrderedGPO we need to determine the precedence order of the GPOs and then back them up
@@ -321,7 +329,7 @@ function ConvertFrom-GPO
 	{
 		if ($BackupDirectory.EndsWith("\"))
 		{
-			$BackupDirectory = $BackupDirectory.substring(0,$($BackupDirectory.Length -1))
+			$BackupDirectory = $BackupDirectory.substring(0, $($BackupDirectory.Length - 1))
 		}
 		$GPOArray = @()
 		$orderedgpo = Get-GpoPrecedenceOrder -Target $target
@@ -333,17 +341,20 @@ function ConvertFrom-GPO
 			}
 			if (-not ([string]::IsNullOrEmpty($($item.displayname))))
 			{
-				if (Test-Path "$($BackupDirectory)\$($item.displayname)")
+				if (-not $UseExisting.IsPresent)
 				{
-					Remove-Item "$($BackupDirectory)\$($item.displayname)" -Force -Recurse
+					if (Test-Path "$($BackupDirectory)\$($item.displayname)")
+					{
+						
+						Remove-Item "$($BackupDirectory)\$($item.displayname)" -Force -Recurse
+					}
+					New-Item -Path "$($BackupDirectory)\$($item.displayname)" -ItemType directory -Force | Out-Null
+					Write-Verbose "$($BackupDirectory)\$($item.displayname)"
+					Backup-GPO -Guid $($item.gpoid) -Path "$($BackupDirectory)\$($item.displayname)" | Out-Null
 				}
-				New-Item -Path "$($BackupDirectory)\$($item.displayname)" -ItemType directory -Force | Out-Null
-				Write-Verbose "$($BackupDirectory)\$($item.displayname)"
-				Backup-GPO -Guid $($item.gpoid) -Path "$($BackupDirectory)\$($item.displayname)" | Out-Null
 				$GPOArray += "$($BackupDirectory)\$($item.displayname)"
 			}
 		}
-		
 	}
 	
 	# If we are passed a GPO object, we can get the path to the files from that object.
@@ -473,7 +484,7 @@ function ConvertFrom-GPO
 	}
 	
 	# Loop through each Audit CSV in the GPO Directory.
-	foreach($AuditCSV in $(if ($pscmdlet.parametersetname -eq "OrderedGPO")
+	foreach ($AuditCSV in $(if ($pscmdlet.parametersetname -eq "OrderedGPO")
 			{
 				$indexCounter = 0
 				$orderedgpo.gpodata | ForEach-Object{
