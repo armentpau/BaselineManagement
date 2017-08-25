@@ -1,4 +1,3 @@
-
 Function Write-GPONTServicesXMLData
 {
     [CmdletBinding()]
@@ -16,17 +15,19 @@ Function Write-GPONTServicesXMLData
     {
         "STOP"
         {
-            $serviceHash.State = "Stopped"
+			#$serviceHash.State = "Stopped"
+			Write-Warning "Write-GPONTServicesXMLData:$_ Service Action is not yet supoported."
         }
 
         "START"
         {
-            $serviceHash.State = "Running"
+			#$serviceHash.State = "Running"
+			Write-Warning "Write-GPONTServicesXMLData:$_ Service Action is not yet supoported."
         }
 
         {[string]::IsNullOrEmpty($_) -or $_ -eq "NOCHANGE"}
         {
-
+			Write-Warning "Write-GPONTServicesXMLData:$_ Service Action is not yet supoported."
         }
 
         Default
@@ -59,7 +60,7 @@ Function Write-GPONTServicesXMLData
     {
         "(LocalService|LocalSystem|NetworkService)"
         {
-            $serviceHash.BuiltInAccount = $_
+            $serviceHash.UserName = $_
         }
 
         {[string]::IsNullOrEmpty($_)}

@@ -475,8 +475,15 @@ Configuration $Name`n{`n`n`t
             $Tabs++
             foreach ($key in $Parameters.Keys)
             {
-                $DSCString += Write-DSCStringKeyPair -Key $key -Value $Parameters[$key] -Tabs $Tabs
-            }
+				try
+				{
+					$DSCString += Write-DSCStringKeyPair -Key $key -Value $Parameters[$key] -Tabs $Tabs -ErrorAction Stop
+				}
+				catch
+				{
+					Write-Warning "The command to Write-DSCStringKeyPair failed due to invalid data.  The returned error was $($Error[0])"
+				}
+			}
             $Tabs--
             $DSCString += "`n`n$(Get-Tabs $Tabs)}$CommentEnd`n"
 

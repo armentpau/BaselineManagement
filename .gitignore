@@ -258,3 +258,7 @@ src/BaselineManagement\.TempPoint\.psm1
 src/Parsers/GPO/InternetSettings\.TempPoint\.ps1
 
 src/Parsers/GPO/ScheduledTasks\.TempPoint\.ps1
+
+src/Parsers/GPO/PowerOptions\.TempPoint\.ps1
+
+src/Parsers/GPO/Services\.TempPoint\.ps1

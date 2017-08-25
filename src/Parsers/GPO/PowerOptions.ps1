@@ -249,9 +249,15 @@ Function Write-GPOPowerSchemeXMLData
     }
 
     foreach ($powerSetting in $PowerSchemeXML.Keys)
-    {
-        $AC = $Properties.GetAttribute("$($powerSetting)AC")
-        $DC = $Properties.GetAttribute("$($powerSetting)DC")
+	{
+		$AC = $null
+		$DC = $null
+		if ($null -ne $powerSetting)
+		{
+			$AC = $Properties.GetAttribute("$($powerSetting)AC")
+			$DC = $Properties.GetAttribute("$($powerSetting)DC")
+		}
+		#Wait-Debugger
         $WriteDSC = $false
         $powerHash.SettingGuid = $PowerGUIDS[$PowerSchemeXML[$powerSetting]]
         

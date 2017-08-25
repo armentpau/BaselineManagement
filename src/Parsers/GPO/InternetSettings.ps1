@@ -48,7 +48,7 @@ Function Write-GPOInternetSettingsXMLData
     $regHash.ValueData = $ValueData
     $regHash.ValueType = $XML.type
 	
-	Update-RegistryHashtable -Hashtable $regHash
+	Update-RegistryHashtable -reghash $regHash
     Write-DSCString -Resource -Type Registry -Name $Name -CommentOut:$CommentOut -Parameters $regHash -Condition $Condition
 }
 #endregion
