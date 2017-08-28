@@ -1,4 +1,5 @@
 #region GPO Parsers
+#need to redo convert-torepetitionstring to do [system.datetime]'00:00:00'
 Function Convert-ToRepetitionString
 {
     [OutputType([string])]
