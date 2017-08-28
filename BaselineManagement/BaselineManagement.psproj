@@ -1,0 +1,33 @@
+﻿<Project Synchronized="False" SyncFilter="*.ps1;*.psm1;*.psd1;*.psxml;*.psf;*.pss;*.xml">
+  <Version>2.0</Version>
+  <FileID>248625d1-6a3e-43aa-be8b-836f47397945</FileID>
+  <ProjectType>2</ProjectType>
+  <Folders />
+  <Files>
+    <File Build="2">C:\Users\949237\Documents\Repos\BaselineManagement\src\BaselineManagement.psd1</File>
+    <File Build="2">C:\Users\949237\Documents\Repos\BaselineManagement\src\BaselineManagement.psm1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\ACL.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\Audit.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\Envionment.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\Files.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\Folders.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\Groups.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\INI.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\InternetSettings.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\NetworkOptions.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\PowerOptions.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\Printers.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\RegionalOptions.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\Registry.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\ScheduledTasks.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\SecuritySettings.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\Services.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\Shares.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\Shortcuts.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\StartMenu.ps1</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Parsers\GPO\UserRightsAssignment.ps1</File>
+  </Files>
+  <DeployMode>Project</DeployMode>
+  <PrimaryFile>
+  </PrimaryFile>
+</Project>
