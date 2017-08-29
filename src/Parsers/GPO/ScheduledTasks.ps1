@@ -9,8 +9,9 @@ Function Convert-ToRepetitionString
         [Parameter(Mandatory = $true)]
         [int]$minutes
     )
-
-    $timeSpan = New-Object System.TimeSpan -ArgumentList 0, 0, 0, $minutes
+	
+	$timeSpan = New-Object System.TimeSpan -ArgumentList 0, 0, 0, $minutes
+	Wait-Debugger
     $interval = "P"
     if ($timeSpan.Days -gt 0)
     {
@@ -30,6 +31,65 @@ Function Convert-ToRepetitionString
     {
         $interval += "S" + $timeSpan.Seconds
     }
+}
+
+function Convert-FromGPOTime
+{
+	
+	$days = 0
+	$hours = 0
+	$years = 0
+	$minutes = 0
+	$years = 0
+	$months = 0
+	$seconds = 0
+	$counter = 0
+	$dateTimeSwitch = $false
+	foreach ($item in $data.ToCharArray())
+	{
+		switch ($item)
+		{
+			"P"{
+				$previousFormatString = $counter + 1
+			}
+			"Y"{
+				$years = $data[$previousFormatString .. ($counter - 1)] -join ""
+				$previousFormatString = $counter + 1
+			}
+			{ $_ -eq "M" -and $dateTimeSwitch -eq $false }
+			{
+				$months = $data[$previousFormatString .. ($counter - 1)] -join ""
+				$previousFormatString = $counter + 1
+			}
+			"T"{
+				$dateTimeSwitch = $true
+				$previousFormatString = $counter + 1
+			}
+			"D"{
+				$days = $data[$previousFormatString .. ($counter - 1)] -join ""
+				$previousFormatString = $counter + 1
+			}
+			"H"{
+				$hours = $data[$previousFormatString .. ($counter - 1)] -join ""
+				$previousFormatString = $counter + 1
+			}
+			{ $_ -eq "M" -and $dateTimeSwitch -eq $true }
+			{
+				$minutes = $data[$previousFormatString .. ($counter - 1)] -join ""
+				$previousFormatString = $counter + 1
+			}
+			"S"{
+				$seconds = $data[$previousFormatString .. ($counter - 1)] -join ""
+				$previousFormatString = $counter + 1
+			}
+			default
+			{
+				#nothing happening here
+			}
+		}
+		$counter++	
+	}
+	(New-TimeSpan -Days (([int]$days) + ([int]$years * 365) + ([int]$months * 30)) -Seconds ([int]$seconds) -Minutes ([int]$minutes) -Hours ([int]$hours)).totalminutes
 }
 
 Function Test-BoolOrNull
