@@ -87,8 +87,10 @@ function Convert-FromGPOTime
 				#nothing happening here
 			}
 		}
-		$counter++	
+		$counter++
 	}
+	#how do we handle years - they can be either 365  or 366 depending on leap year or not
+	#how do we handle months - they can be from 28 - 31 days
 	(New-TimeSpan -Days (([int]$days) + ([int]$years * 365) + ([int]$months * 30)) -Seconds ([int]$seconds) -Minutes ([int]$minutes) -Hours ([int]$hours)).totalminutes
 }
 
