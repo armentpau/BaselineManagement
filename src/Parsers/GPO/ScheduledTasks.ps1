@@ -6,7 +6,7 @@ Function Convert-ToRepetitionString
 	param
 	(
 		[Parameter(Mandatory = $true)]
-		[int]$miRnutes
+		[int]$minutes
 	)
 	
 	$timeSpan = New-Object System.TimeSpan -ArgumentList 0, 0, 0, $minutes
@@ -113,6 +113,10 @@ Function Write-GPOScheduledTasksXMLData
 	
 	$schTaskHash = @{ }
 	$Properties = $XML.Properties
+	if ($Properties.logonType -eq "InteractiveToken")
+	{
+		$Properties.logonType = "S4U"
+	}
 	# Set up Task Triggers if necessary
 	switch -regex ($XML.LocalName)
 	{
@@ -142,7 +146,7 @@ Function Write-GPOScheduledTasksXMLData
 			$settings = @{
 				EmbeddedInstance		    = "TaskSettingsSet"
 				Enabled					    = Test-BoolOrNull $Properties.enabled
-				RunOnIdle				    = Test-BoolOrNull $Properties.startOnlyIfIdle
+				RunOnlyIfIdle				    = Test-BoolOrNull $Properties.startOnlyIfIdle
 				ExecutionTimeLimit		    = (Convert-ToRepetitionString -minutes $Properties.maxRunTime)
 				IdleSetting				    = @{
 					EmbeddedInstance		    = "IdleSetting"
@@ -159,7 +163,7 @@ Function Write-GPOScheduledTasksXMLData
 					@{
 						EmbeddedInstance  = "TaskTriggers"
 						Id			      = "ImmediateTask Trigger($($schTaskHash.Name)): $(New-Guid)"
-						StartBoundary	  = (Get-Date).AddMinutes(15)
+						StartBoundary	  = "`"$((Get-Date).AddMinutes(15))`""
 					}
 				)
 				break
@@ -220,12 +224,12 @@ Function Write-GPOScheduledTasksXMLData
 				
 				if ($t.hasEndDate)
 				{
-					$tmpHash.EndBoundary = Get-Date -Day $t.endDay -Month $t.endMonth -Year $t.endYear
+					$tmpHash.EndBoundary = "`"$(Get-Date -Day $t.endDay -Month $t.endMonth -Year $t.endYear)`""
 				}
 				
 				$tmpHash.DaysOfWeek = 0 # MUST map to the day of the week in which the job will process for jobs that execute on a selected day. The field is a bit mask with 1 assigned to Sunday, 2 to Monday, 4 to Tuesday, 8 to Wednesday, 16 to Thursday, 32 to Friday, and 64 to Saturday.
 				
-				$tmpHash.StartBoundary = Get-Date -Year $t.beginYear -Month $t.beginMonth -Day $t.beginDay -Hour $t.startHour -Minute $t.startMinutes
+				$tmpHash.StartBoundary = "`"$(Get-Date -Year $t.beginYear -Month $t.beginMonth -Day $t.beginDay -Hour $t.startHour -Minute $t.startMinutes)`""
 				
 				if ($t.repeatTask)
 				{
@@ -273,6 +277,10 @@ Function Write-GPOScheduledTasksXMLData
 			{
 				foreach ($p in $Properties.Task.Prinicpals.ChildNodes)
 				{
+					if ($p.logonType -eq "InteractiveToken")
+					{
+						$p.logonType = "S4U"
+					}
 					$principal = @{
 						EmbeddedInstance  = "TaskUserPrincipal"
 						UserId		      = $p.UserId
@@ -335,7 +343,7 @@ Function Write-GPOScheduledTasksXMLData
 					@{
 						Id  = "ImmediateTask Trigger($($schTaskHash.Name)): $(New-Guid)"
 						EmbeddedInstance = "TaskTriggers"
-						StartBoundary = (Get-Date).AddMinutes(15)
+						StartBoundary = "`"$((Get-Date).AddMinutes(15))`""
 					}
 				)
 				break
@@ -374,7 +382,7 @@ Function Write-GPOScheduledTasksXMLData
 							
 							"StartBoundary"
 							{
-								$tmpHash.StartBoundary = $t.StartBoundary
+								$tmpHash.StartBoundary = "`"$($t.StartBoundary)`""
 							}
 							
 							"Enabled"
@@ -393,8 +401,8 @@ Function Write-GPOScheduledTasksXMLData
 					{
 						$tmpHash.Enabled = Test-BoolOrNull $t.Enabled
 						$tmpHash.Id = "$_ Trigger ($($schTaskHash.Name)): $(New-Guid)"
-						$tmpHash.StartBoundary = $t.StartBoundary
-						$tmpHash.EndBoundary = $t.EndBoundary
+						$tmpHash.StartBoundary = "`"$($t.StartBoundary)`""
+						$tmpHash.EndBoundary = "`"$($t.EndBoundary)`""
 						$tmpHash.Delay = $t.Delay
 						$tmpHash.ExecutionTimeLimit = $t.ExecutionTimeLimit
 						$tmpHash.TaskRepetition = @{

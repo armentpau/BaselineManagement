@@ -29,6 +29,7 @@
     <File Build="2">C:\Users\949237\Documents\Repos\BaselineManagement\External DSC Resources\xScheduledTask\1.0.0.6\DSCResources\xScheduledTask\xScheduledTask.psm1</File>
     <File Build="2">C:\Users\949237\Documents\Repos\BaselineManagement\External DSC Resources\xScheduledTask\1.0.0.6\DSCResources\xScheduledTask\xScheduledTask.schema.mof</File>
     <File Build="2">C:\Users\949237\Documents\BaselineTesting.txt</File>
+    <File Build="2" Shared="False">C:\Users\949237\Documents\Repos\BaselineManagement\src\Helpers\Functions.ps1</File>
   </Files>
   <DeployMode>Project</DeployMode>
   <PrimaryFile>

@@ -91,7 +91,8 @@ Function Test-Conflicts
 			#if ($Name -like "*ACL(INF): HKLM:\SOFTWARE\Aurora*")
 	#		{
 	#			Wait-Debugger
-	#		}
+			#		}
+			
 			if ($script:GlobalNameConflictEngine.get_item($Name))
 			{
 				Write-Verbose "Detected conflicting name $($Name).  Commenting Out Block"

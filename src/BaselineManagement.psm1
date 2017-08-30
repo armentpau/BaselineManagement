@@ -102,8 +102,6 @@ function Get-GpoPrecedenceOrder
 			}
 			foreach ($item in $gpoOrderArray | Sort-Object -Property order)
 			{
-				Write-Host $gpoCounter
-				Write-Host $item.order
 				$item.order = $gpoCounter
 				$gpoCounter++
 			}
@@ -323,7 +321,7 @@ function ConvertFrom-GPO
 		[Parameter(ParameterSetName = 'OrderedGPO')]
 		[switch]$UseExisting
 	)
-	
+	$hashConversion = @{}
 	#If we are passed OrderedGPO we need to determine the precedence order of the GPOs and then back them up
 	if ($PSCmdlet.ParameterSetName -eq "OrderedGPO")
 	{
@@ -737,7 +735,7 @@ function ConvertFrom-GPO
 			"IniFiles"
 			{
 				$Settings = (Select-Xml -XPath "//$_" -Xml $XMLContent).Node
-				foreach ($setting in $settings)
+				foreach ($setting in $settings.ini)
 				{
 					$ConfigString += Write-GPOIniFileXMLData -XML $Setting
 				}
