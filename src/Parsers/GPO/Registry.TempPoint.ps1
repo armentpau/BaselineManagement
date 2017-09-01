@@ -297,13 +297,9 @@ Function Write-GPORegistryXMLData
             Write-Warning "Write-GPORegistryXMLData: Current User Registry settings are not yet supported."
             $regHash.Key = "HKCU:\"
             $CommentOUT = $true
-		}
-		"HKEY_USERS"
-		{
-			$CommentOUT = $true
-		}
-	}
-	
+        }
+    }
+
     $regHash.Key = Join-Path -Path $regHash.Key -ChildPath $Properties.Key
 
     Update-RegistryHashtable $regHash

@@ -88,10 +88,10 @@ Function Test-Conflicts
             }
 			
 			# If we found a conflict.
-			#if ($Name -like "*ACL(INF): HKLM:\SOFTWARE\Aurora*")
-	#		{
-	#			Wait-Debugger
-			#		}
+			<#if ($Name -like "*ACL(*")
+			{
+				Wait-Debugger
+			}#>
 			
 			if ($script:GlobalNameConflictEngine.get_item($Name))
 			{

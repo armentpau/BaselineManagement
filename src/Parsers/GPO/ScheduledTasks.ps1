@@ -123,7 +123,7 @@ Function Write-GPOScheduledTasksXMLData
 		"^(Task|ImmediateTask)$"
 		{
 			$schTaskHash.Name = $Properties.Name
-			$schTaskHash.Path = "\DSC\"
+			$schTaskHash.Path = "\"
 			
 			$actions = @{
 				EmbeddedInstance  = "TaskAction"
@@ -256,7 +256,7 @@ Function Write-GPOScheduledTasksXMLData
 		"^(Task|ImmediateTask)V2$"
 		{
 			$schTaskHash.Name = $XML.Name
-			$schTaskHash.Path = "\DSC\"
+			$schTaskHash.Path = "\"
 			
 			$schTaskHash.TaskAction = @()
 			foreach ($a in $Properties.Task.Actions.ChildNodes)

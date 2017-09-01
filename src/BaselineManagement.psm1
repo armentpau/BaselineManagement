@@ -47,7 +47,7 @@ function Get-GpoPrecedenceOrder
 		{
 			Write-Verbose $ouTarget
 			$TargetSplitArray = $ouTarget.tostring().tolower() -split ","
-			$domainName = "dc=$((Get-ADDomain -Server $($Server)).name.tostring().tolower())"
+			$domainName = "dc=$((Get-ADDomain -Server $Server).name.tostring().tolower())"
 			$domainIndex = [array]::IndexOf($TargetSplitArray, $domainName)
 			$OUArray = @()
 			$counter = 0
@@ -56,21 +56,18 @@ function Get-GpoPrecedenceOrder
 				Write-Verbose "Working with ou $($($TargetSplitArray[$counter .. $(($TargetSplitArray | measure-object).count - 1)] -join ","))"
 				$OUArray += New-Object -TypeName System.Management.Automation.PSObject -Property @{
 					"Order"		    = $counter + 1
-					"OUData"	    = Get-ADobject -Identity $($TargetSplitArray[$counter .. $(($TargetSplitArray | measure-object).count - 1)] -join ",") -Server $($Server)
-					"Links"		    = Get-GPInheritance -Target $($TargetSplitArray[$counter .. $(($TargetSplitArray | measure-object).count - 1)] -join ",") -Server $($Server)
-					"Blocked"	    = (Get-GPInheritance -Target $($TargetSplitArray[$counter .. $(($TargetSplitArray | measure-object).count - 1)] -join ",") -Server $($server)).gpoInheritanceBlocked
+					"OUData"	    = Get-ADobject -Identity $($TargetSplitArray[$counter .. $(($TargetSplitArray | measure-object).count - 1)] -join ",") -Server $Server
+					"Links"		    = Get-GPInheritance -Target $($TargetSplitArray[$counter .. $(($TargetSplitArray | measure-object).count - 1)] -join ",") -Server $Server
 				}
 				$counter++
 			}
 			while ($counter -le $domainIndex)
 			$gpoOrderArray = @()
-			$gpoOrderArrayEnforced = @()
-			$combinedArray = @()
 			$gpoCounter = 1
 			foreach ($item in ($OUArray | Sort-Object -Property order -Descending))
 			{
 				$item.links.gpolinks | where-object{ $_.enforced -eq $true } | Where-Object{ $_.enabled -eq $true } | Sort-Object -Property order | ForEach-Object{
-					$gpoOrderArrayEnforced += New-Object -TypeName System.Management.Automation.PSObject -Property @{
+					$gpoOrderArray += New-Object -TypeName System.Management.Automation.PSObject -Property @{
 						"GPOID"	      = $_.gpoid
 						"DisplayName" = $_.displayname
 						"Enabled"	  = $_.enabled
@@ -81,36 +78,26 @@ function Get-GpoPrecedenceOrder
 					$gpoCounter++
 				}
 			}
-			$tempgpocounter = 1
-			foreach ($item in ($OUArray | Sort-Object -Property order -Descending))
+			
+			foreach ($item in ($OUArray | Sort-Object -Property order))
 			{
-				if ($item.blocked -eq $true)
-				{
-					$gpoOrderArray = @()
-				}
 				$item.links.gpolinks | where-object{ $_.enforced -eq $false } | Where-Object{ $_.enabled -eq $true } | Sort-Object -Property order | ForEach-Object{
 					$gpoOrderArray += New-Object -TypeName System.Management.Automation.PSObject -Property @{
-						"GPOID"		    = $_.gpoid
-						"DisplayName"   = $_.displayname
-						"Enabled"	    = $_.enabled
-						"Enforced"	    = $_.enforced
-						"Target"	    = $_.target
-						"Order"		    = $tempgpoCounter
+						"GPOID"	       = $_.gpoid
+						"DisplayName"  = $_.displayname
+						"Enabled"	   = $_.enabled
+						"Enforced"	   = $_.enforced
+						"Target"	   = $_.target
+						"Order"	       = $gpoCounter
 					}
-					$tempgpoCounter++
+					$gpoCounter++
 				}
 			}
-			foreach ($item in $gpoOrderArray | Sort-Object -Property order)
-			{
-				$item.order = $gpoCounter
-				$gpoCounter++
-			}
-			$combinedArray = $gpoOrderArrayEnforced
-			$combinedArray += $gpoOrderArray | Sort-Object -Property order
 			New-Object -TypeName System.Management.Automation.PSObject -Property @{
 				"OU"    = $($ouTarget.ToString())
-				"GPOData" = $combinedArray
+				"GPOData" = $gpoOrderArray
 			}
+			
 		}
 	}
 	END
