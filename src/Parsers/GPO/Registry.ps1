@@ -160,10 +160,9 @@ Function Update-RegistryHashtable
         $regHash.Remove("ValueData")
     }
     $typeHash = @{"REG_SZ" = "String"; "REG_NONE" = "None"; "REG_DWORD" = "Dword"; "REG_EXPAND_SZ" = "ExpandString"; "REG_QWORD" = "Qword"; "REG_BINARY" = "Binary"; "REG_MULTI_SZ" = "MultiString"}
-
-    if ($typeHash.ContainsKey($regHash.ValueType))
+    if ($typeHash.ContainsKey("$($regHash.ValueType)"))
     {
-        $regHash.ValueType = $typeHash[$regHash.ValueType]
+        $regHash.ValueType = $typeHash["$($regHash.ValueType)"]
     }
     else
     {
@@ -190,8 +189,8 @@ Function Update-RegistryHashtable
                 [string]$regHash.ValueData = "'$($regHash.ValueData)'" -replace "[^\u0020-\u007E]", ""
             }
             
-            "Dword" 
-            { 
+            "Dword"
+			{
                 $ValueData = 1
                 if ($regHash.ValueData -match "(Disabled|Enabled|Not Defined|True|False)" -or $ValueData -eq "''")
                 {
@@ -251,7 +250,6 @@ $($regHash.ValueData)
             Default { $regHash.ValueType = "None" }
         }
     }
-
     if ($regHash.ValueType -eq "None")
     {
         # The REG_NONE is not allowed by the Registry resource.
@@ -337,11 +335,10 @@ Function Write-GPORegistryPOLData
     }
 
     $regHash.ValueName = $Data.ValueName
-    $regHash.Key = Join-Path -Path $regHash.Key -ChildPath $Data.KeyName
-    $regHash.ValueType = $Data.ValueType
-    $regHash.ValueData = $Data.ValueData
+	$regHash.Key = Join-Path -Path $regHash.Key -ChildPath $Data.KeyName
+	$regHash.ValueType = $Data.ValueType
+	$regHash.ValueData = $Data.ValueData
     Update-RegistryHashtable $regHash
-    
     $output = Register-RegistryDELVALDependsOn $regHash
 
     if ($output -ne $null)
@@ -350,7 +347,6 @@ Function Write-GPORegistryPOLData
     }
         
     Add-RegistryDELVALDependsOn $regHash
-
     Write-DSCString -Resource -Name "Registry(POL): $(Join-Path -Path $regHash.Key -ChildPath $regHash.ValueName)" -Type Registry -Parameters $regHash -CommentOUT:$CommentOUT
 }
 
