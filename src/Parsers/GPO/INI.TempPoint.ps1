@@ -9,7 +9,7 @@ Function Write-GPOIniFileXMLData
     )
 
     $Properties = $XML.Properties
-    #Wait-Debugger
+    
     $iniHash = @{}
     $iniHash.Path = $Properties.Path
     switch -regex ($Properties.Action)
